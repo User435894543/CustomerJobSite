@@ -50,13 +50,13 @@ namespace VVT.ASP.NETv2
 
             }
 
-            string queryString = "SELECT Job.\"Job-Id\",  ScheduleByJob.\"TagStatus-ID\", Job.\"Job-Desc\", Job.\"Quantity-Ordered\", Job.\"Date-Ship-By\", JobFreeField.\"Free-Field-Char\" " +
-                
-                "FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.JobFreeField ON Job.\"Job-Id\" = JobFreeField.\"Job-Id\" " +
+            string queryString = "SELECT Job.\"Job-Id\",  ScheduleByJob.\"TagStatus-ID\", Job.\"Job-Desc\", Job.\"Quantity-Ordered\", Job.\"Date-Ship-By\", MailingVersionFreeField.\"Free-Field-Char\", " +
+
+                "Job.\"PO-Number\" FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.MailingVersionFreeField ON Job.\"Job-Id\" = MailingVersionFreeField.\"Job-Id\" " +
                 
                 "WHERE \"Cust-ID-Ordered-by\" = \'"+cust+ "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
-                
-                "ScheduleByJob.\"Work-Center-ID\" =\'950\' AND JobFreeField.\"Sequence\" = 13" +
+
+                "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
                 
                 "ORDER BY Job.\"Job-ID\" DESC";
 
@@ -72,9 +72,15 @@ namespace VVT.ASP.NETv2
             dt.Columns[1].ColumnName = "Job Status";
             dt.Columns[2].ColumnName = "Job Description";
             dt.Columns[3].ColumnName = "Quantity Ordered";
-            dt.Columns[4].ColumnName = "Date Ship By";
-            dt.Columns[5].ColumnName = "Type of Job";
+            dt.Columns[4].ColumnName = "Date Ship By Bad";
+            dt.Columns[5].ColumnName = "Postage Class";
+            dt.Columns[6].ColumnName = "AC Rep";
 
+            //lol no way to format date ship by what a joke
+            dt.Columns.Add("Date Ship By");
+
+            //postage cost (calcualted field)
+            dt.Columns.Add("Postage Amount");
 
             //here is where 
             /*
@@ -85,6 +91,7 @@ namespace VVT.ASP.NETv2
                 90 - Complete
                 92 Mailed
              */
+
 
             foreach (DataRow dr in dt.Rows) {
 
@@ -107,7 +114,7 @@ namespace VVT.ASP.NETv2
 
                 try
                 {
-                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 09 && Convert.ToInt32(dr["Job Status"].ToString()) <= 69)
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 09 && Convert.ToInt32(dr["Job Status"].ToString()) <= 79)
                     {
                         dr["Job Status"] = dr["Job Status"].ToString() + " - In Progress";
                     }
@@ -125,7 +132,7 @@ namespace VVT.ASP.NETv2
 
                 try
                 {
-                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 70 && Convert.ToInt32(dr["Job Status"].ToString()) <= 88)
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 80 && Convert.ToInt32(dr["Job Status"].ToString()) <= 88)
                     {
                         dr["Job Status"] = dr["Job Status"].ToString() + " - Mailing Production";
                     }
@@ -177,6 +184,23 @@ namespace VVT.ASP.NETv2
 
                 }
 
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 95)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " - Delivered";
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 92: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
 
                 //These are statuses that cannot convert to int {50d, 50j, 50e, 97b}
                 try
@@ -215,10 +239,91 @@ namespace VVT.ASP.NETv2
                 }
 
 
+                //06.20 format date no time stamp just date (mm/dd/yyy)
+                try
+                {
+
+                    DateTime dateTime = new DateTime();
+
+                    dateTime = DateTime.Parse(dr["Date Ship By Bad"].ToString());
+
+                    string formattedDate = dateTime.ToString("MM-dd-yyyy");
+
+                    dr["Date Ship By"] = formattedDate;
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: Format Job Ship By " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+       
+             //06.20.2024 - shorten description field to 20 charectors
+            try {
+
+                    dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: Description shorten to 20 chars: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                //calculate postage amount
+                /*
+                 * Postage Class = First Class Presort then quantity ordered x .25 = postage amount
+                 * Postage class = Standard Presort then qty ordered x .10 = postage amount
+                 * 
+                 */
+
+                string aaa = dr["Postage Class"].ToString();
+
+                if (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort"))
+                {
+
+                   int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+
+                    double cost = qty * .25;
+
+                    dr["Postage Amount"] = "$" + cost.ToString();
+                }
+
+                if (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort"))
+                {
+
+                    int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+
+                    double cost = qty * .10;
+
+                    dr["Postage Amount"] = "$" + cost.ToString();
+                }
             }//end foreach
 
 
 
+            //drop unformatted column and set ordinal so columns back in order lol
+            dt.Columns.Remove("Date Ship By Bad");
+
+            dt.Columns["Job ID"].SetOrdinal(0);
+            dt.Columns["Job Status"].SetOrdinal(1);
+            dt.Columns["Job Description"].SetOrdinal(2);
+            dt.Columns["Quantity Ordered"].SetOrdinal(3);
+            dt.Columns["Date Ship By"].SetOrdinal(4);
+            dt.Columns["Postage Class"].SetOrdinal(5);
+            dt.Columns["Postage Amount"].SetOrdinal(6);
+            dt.Columns["AC Rep"].SetOrdinal(7);
 
             //this will show data from dataTable (dt)
             GridView1.DataSource = dt;
@@ -286,13 +391,13 @@ namespace VVT.ASP.NETv2
 
             }
 
-            string queryString = "SELECT Job.\"Job-Id\",  ScheduleByJob.\"TagStatus-ID\", Job.\"Job-Desc\", Job.\"Quantity-Ordered\", Job.\"Date-Ship-By\", JobFreeField.\"Free-Field-Char\" " +
+            string queryString = "SELECT Job.\"Job-Id\",  ScheduleByJob.\"TagStatus-ID\", Job.\"Job-Desc\", Job.\"Quantity-Ordered\", Job.\"Date-Ship-By\", MailingVersionFreeField.\"Free-Field-Char\", " +
 
-                "FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.JobFreeField ON Job.\"Job-Id\" = JobFreeField.\"Job-Id\" " +
+                "Job.\"PO-Number\" FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.MailingVersionFreeField ON Job.\"Job-Id\" = MailingVersionFreeField.\"Job-Id\" " +
 
                 "WHERE \"Cust-ID-Ordered-by\" = \'" + cust + "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
 
-                "ScheduleByJob.\"Work-Center-ID\" =\'950\' AND JobFreeField.\"Sequence\" = 13" +
+                "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
 
                 "ORDER BY Job.\"Job-ID\" DESC";
 
@@ -308,9 +413,16 @@ namespace VVT.ASP.NETv2
             dt.Columns[1].ColumnName = "Job Status";
             dt.Columns[2].ColumnName = "Job Description";
             dt.Columns[3].ColumnName = "Quantity Ordered";
-            dt.Columns[4].ColumnName = "Date Ship By";
-            dt.Columns[5].ColumnName = "Type of Job";
+            dt.Columns[4].ColumnName = "Date Ship By Bad";
+            dt.Columns[5].ColumnName = "Postage Class";
+            dt.Columns[6].ColumnName = "AC Rep";
 
+
+            //lol no way to format date ship by what a joke
+            dt.Columns.Add("Date Ship By");
+
+            //postage cost (calcualted field)
+            dt.Columns.Add("Postage Amount");
 
             //here is where 
             /*
@@ -321,6 +433,7 @@ namespace VVT.ASP.NETv2
                 90 - Complete
                 92 Mailed
              */
+
 
             foreach (DataRow dr in dt.Rows)
             {
@@ -345,7 +458,7 @@ namespace VVT.ASP.NETv2
 
                 try
                 {
-                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 09 && Convert.ToInt32(dr["Job Status"].ToString()) <= 69)
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 09 && Convert.ToInt32(dr["Job Status"].ToString()) <= 79)
                     {
                         dr["Job Status"] = dr["Job Status"].ToString() + " - In Progress";
                     }
@@ -363,7 +476,7 @@ namespace VVT.ASP.NETv2
 
                 try
                 {
-                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 70 && Convert.ToInt32(dr["Job Status"].ToString()) <= 88)
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) >= 80 && Convert.ToInt32(dr["Job Status"].ToString()) <= 88)
                     {
                         dr["Job Status"] = dr["Job Status"].ToString() + " - Mailing Production";
                     }
@@ -415,6 +528,23 @@ namespace VVT.ASP.NETv2
 
                 }
 
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 95)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " - Delivered";
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 92: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
 
                 //These are statuses that cannot convert to int {50d, 50j, 50e, 97b}
                 try
@@ -454,13 +584,98 @@ namespace VVT.ASP.NETv2
                 }
 
 
+                //06.20 format date no time stamp just date (mm/dd/yyy)
+                try
+                {
+
+                    DateTime dateTime = new DateTime();
+
+                    dateTime = DateTime.Parse(dr["Date Ship By Bad"].ToString());
+
+                    string formattedDate = dateTime.ToString("MM-dd-yyyy");
+
+                    dr["Date Ship By"] = formattedDate;
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: Format Job Ship By " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+
+                //06.20.2024 - shorten description field to 20 charectors
+                try
+                {
+
+                    dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: Description shorten to 20 chars: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                //calculate postage amount
+                /*
+                 * Postage Class = First Class Presort then quantity ordered x .25 = postage amount
+                 * Postage class = Standard Presort then qty ordered x .10 = postage amount
+                 * 
+                 */
+
+                string aaa = dr["Postage Class"].ToString();
+
+                if (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort"))
+                {
+
+                    int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+
+                    double cost = qty * .25;
+
+                    dr["Postage Amount"] = "$" + cost.ToString();
+                }
+
+                if (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort"))
+                {
+
+                    int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+
+                    double cost = qty * .10;
+
+                    dr["Postage Amount"] = "$" + cost.ToString();
+                }
             }//end foreach
 
+
+
+            //drop unformatted column and set ordinal so columns back in order lol
+            dt.Columns.Remove("Date Ship By Bad");
+
+            dt.Columns["Job ID"].SetOrdinal(0);
+            dt.Columns["Job Status"].SetOrdinal(1);
+            dt.Columns["Job Description"].SetOrdinal(2);
+            dt.Columns["Quantity Ordered"].SetOrdinal(3);
+            dt.Columns["Date Ship By"].SetOrdinal(4);
+            dt.Columns["Postage Class"].SetOrdinal(5);
+            dt.Columns["Postage Amount"].SetOrdinal(6);
+            dt.Columns["AC Rep"].SetOrdinal(7);
 
             //this will show data from dataTable (dt)
             GridView1.DataSource = dt;
 
             GridView1.DataBind();
+
 
             Label3.Text = "...Done! Last refresh: "+DateTime.Now;
             Label1.Visible = true;
