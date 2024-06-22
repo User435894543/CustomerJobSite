@@ -57,8 +57,8 @@ namespace VVT.ASP.NETv2
                 "WHERE \"Cust-ID-Ordered-by\" = \'"+cust+ "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
 
                 "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
-                
-                "ORDER BY Job.\"Job-ID\" DESC";
+
+                "ORDER BY ScheduleByJob.\"TagStatus-ID\"";
 
             OdbcDataAdapter custDTadap = new OdbcDataAdapter(queryString, dbConn); //connects to database and passes sql string above to query
 
@@ -71,7 +71,7 @@ namespace VVT.ASP.NETv2
             dt.Columns[0].ColumnName = "Job ID";
             dt.Columns[1].ColumnName = "Job Status";
             dt.Columns[2].ColumnName = "Job Description";
-            dt.Columns[3].ColumnName = "Quantity Ordered";
+            dt.Columns[3].ColumnName = "Quantity";
             dt.Columns[4].ColumnName = "Date Ship By Bad";
             dt.Columns[5].ColumnName = "Postage Class";
             dt.Columns[6].ColumnName = "AC Rep";
@@ -80,21 +80,14 @@ namespace VVT.ASP.NETv2
             dt.Columns.Add("Date Ship By");
 
             //postage cost (calcualted field)
-            dt.Columns.Add("Postage Amount");
+            dt.Columns.Add("Postage for Stamps");
 
-            //here is where 
-            /*
-             Job statues-show description
-                02-08 - Waiting for All Files
-                09-69 - In Progress
-                70-88 - Mailing Production
-                90 - Complete
-                92 Mailed
-             */
+    
 
 
             foreach (DataRow dr in dt.Rows) {
 
+                #region Job status in easy read forms
                 try
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) >= 02 && Convert.ToInt32(dr["Job Status"].ToString()) <= 08)
@@ -237,8 +230,9 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                #endregion
 
-
+                #region Date Ship By Formatting (MM/dd/yyy)
                 //06.20 format date no time stamp just date (mm/dd/yyy)
                 try
                 {
@@ -262,10 +256,12 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                #endregion
 
-       
-             //06.20.2024 - shorten description field to 20 charectors
-            try {
+                #region Job Description Format to 20 chars
+                //06.20.2024 - shorten description field to 20 charectors
+                try
+                {
 
                     dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
 
@@ -280,7 +276,34 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                #endregion
 
+                #region Mark to bill stamp records if sequence = 1 equals PC Stamp will need loop
+
+                dbConn.Open();
+                DataTable dtStampBillCheck = new DataTable();
+
+                string queryToMarkStampBill = "Select MailingVersionFreeField.\"Free-Field-Char\" FROM PUB.MailingVersionFreeField WHERE \"Job-Id\" = " + dr["Job ID"].ToString() + " AND \"Sequence\"=1";
+                OdbcDataAdapter querySeq1 = new OdbcDataAdapter(queryToMarkStampBill, dbConn); //connects to database and passes sql string above to query
+
+                querySeq1.Fill(dtStampBillCheck);
+
+                dbConn.Close();
+
+                string pcStampStr = dtStampBillCheck.Rows[0][0].ToString();
+                bool billIt = false;
+
+                //now mark seq5 (append Y/N) in column "Postage Class" { if dtStampBillCheck \"Free-Field-Char\" = PC Stamp }
+                if (pcStampStr == "PC Stamp" || pcStampStr.ToUpper() == "PC Stamp" || pcStampStr.ToLower() == "PC Stamp" || pcStampStr.Contains("PC Stamp")) {
+
+                    billIt = true;
+
+                }
+               
+
+                #endregion
+
+                #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
                 /*
                  * Postage Class = First Class Presort then quantity ordered x .25 = postage amount
@@ -290,25 +313,35 @@ namespace VVT.ASP.NETv2
 
                 string aaa = dr["Postage Class"].ToString();
 
-                if (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort"))
+                if ( billIt == true && (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort")))
                 {
 
-                   int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
 
                     double cost = qty * .25;
 
-                    dr["Postage Amount"] = "$" + cost.ToString();
+                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
                 }
 
-                if (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort"))
+                else if (billIt == true && (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort")))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
 
                     double cost = qty * .10;
 
-                    dr["Postage Amount"] = "$" + cost.ToString();
+                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
+                }//end else if can put more else if here
+                
+                else { //this will execute if all false^ 
+
+                    dr["Postage for Stamps"] = "$0.00";
+
                 }
+                #endregion
+
+
+
             }//end foreach
 
 
@@ -319,10 +352,10 @@ namespace VVT.ASP.NETv2
             dt.Columns["Job ID"].SetOrdinal(0);
             dt.Columns["Job Status"].SetOrdinal(1);
             dt.Columns["Job Description"].SetOrdinal(2);
-            dt.Columns["Quantity Ordered"].SetOrdinal(3);
+            dt.Columns["Quantity"].SetOrdinal(3);
             dt.Columns["Date Ship By"].SetOrdinal(4);
             dt.Columns["Postage Class"].SetOrdinal(5);
-            dt.Columns["Postage Amount"].SetOrdinal(6);
+            dt.Columns["Postage for Stamps"].SetOrdinal(6);
             dt.Columns["AC Rep"].SetOrdinal(7);
 
             //this will show data from dataTable (dt)
@@ -391,15 +424,16 @@ namespace VVT.ASP.NETv2
 
             }
 
+
             string queryString = "SELECT Job.\"Job-Id\",  ScheduleByJob.\"TagStatus-ID\", Job.\"Job-Desc\", Job.\"Quantity-Ordered\", Job.\"Date-Ship-By\", MailingVersionFreeField.\"Free-Field-Char\", " +
 
-                "Job.\"PO-Number\" FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.MailingVersionFreeField ON Job.\"Job-Id\" = MailingVersionFreeField.\"Job-Id\" " +
+                       "Job.\"PO-Number\" FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.MailingVersionFreeField ON Job.\"Job-Id\" = MailingVersionFreeField.\"Job-Id\" " +
 
-                "WHERE \"Cust-ID-Ordered-by\" = \'" + cust + "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
+                       "WHERE \"Cust-ID-Ordered-by\" = \'" + cust + "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
 
-                "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
+                       "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
 
-                "ORDER BY Job.\"Job-ID\" DESC";
+                       "ORDER BY ScheduleByJob.\"TagStatus-ID\"";
 
             OdbcDataAdapter custDTadap = new OdbcDataAdapter(queryString, dbConn); //connects to database and passes sql string above to query
 
@@ -412,7 +446,7 @@ namespace VVT.ASP.NETv2
             dt.Columns[0].ColumnName = "Job ID";
             dt.Columns[1].ColumnName = "Job Status";
             dt.Columns[2].ColumnName = "Job Description";
-            dt.Columns[3].ColumnName = "Quantity Ordered";
+            dt.Columns[3].ColumnName = "Quantity";
             dt.Columns[4].ColumnName = "Date Ship By Bad";
             dt.Columns[5].ColumnName = "Postage Class";
             dt.Columns[6].ColumnName = "AC Rep";
@@ -422,7 +456,7 @@ namespace VVT.ASP.NETv2
             dt.Columns.Add("Date Ship By");
 
             //postage cost (calcualted field)
-            dt.Columns.Add("Postage Amount");
+            dt.Columns.Add("Postage for Stamps");
 
             //here is where 
             /*
@@ -627,6 +661,7 @@ namespace VVT.ASP.NETv2
 
                 }
 
+                #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
                 /*
                  * Postage Class = First Class Presort then quantity ordered x .25 = postage amount
@@ -639,22 +674,24 @@ namespace VVT.ASP.NETv2
                 if (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort"))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
 
                     double cost = qty * .25;
 
-                    dr["Postage Amount"] = "$" + cost.ToString();
+                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
                 }
 
                 if (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort"))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity Ordered"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
 
                     double cost = qty * .10;
 
-                    dr["Postage Amount"] = "$" + cost.ToString();
+                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
                 }
+                #endregion
+
             }//end foreach
 
 
@@ -665,11 +702,12 @@ namespace VVT.ASP.NETv2
             dt.Columns["Job ID"].SetOrdinal(0);
             dt.Columns["Job Status"].SetOrdinal(1);
             dt.Columns["Job Description"].SetOrdinal(2);
-            dt.Columns["Quantity Ordered"].SetOrdinal(3);
+            dt.Columns["Quantity"].SetOrdinal(3);
             dt.Columns["Date Ship By"].SetOrdinal(4);
             dt.Columns["Postage Class"].SetOrdinal(5);
-            dt.Columns["Postage Amount"].SetOrdinal(6);
+            dt.Columns["Postage for Stamps"].SetOrdinal(6);
             dt.Columns["AC Rep"].SetOrdinal(7);
+
 
             //this will show data from dataTable (dt)
             GridView1.DataSource = dt;
