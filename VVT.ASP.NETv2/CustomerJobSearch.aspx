@@ -72,7 +72,7 @@
     
         <asp:datagrid id="GridView1" runat="server" GridLines="Vertical" CellPadding="3" BackColor="White"
 BorderColor="#999999" BorderWidth="1px" BorderStyle="None" Width="100%" Height="100%" Font-Size="11"
-Font-Names="Verdana">
+Font-Names="Verdana" OnSelectedIndexChanged="GridView1_SelectedIndexChanged" AutoGenerateColumns="False">
 <SelectedItemStyle Font-Bold="True" ForeColor="White" BackColor="#008A8C"></SelectedItemStyle>
 <AlternatingItemStyle BackColor="Gainsboro"></AlternatingItemStyle>
 <ItemStyle BorderWidth="2px" ForeColor="Black" BorderStyle="Solid" BorderColor="Black" BackColor="#EEEEEE"></ItemStyle>
@@ -80,7 +80,25 @@ Font-Names="Verdana">
 BorderColor="Black" BackColor="#007A5D"></HeaderStyle>
 <FooterStyle ForeColor="Black" BackColor="#CCCCCC"></FooterStyle>
 <PagerStyle HorizontalAlign="Center" ForeColor="Black" BackColor="#999999" Mode="NumericPages"></PagerStyle>
+
+
+             <Columns>
+
+ 
+                 <asp:BoundColumn DataField="Job ID" HeaderText="Job ID" />
+                 <asp:BoundColumn DataField="Job Status" HeaderText="Job Status" />
+                 <asp:BoundColumn DataField="Job Description" HeaderText="Job Description" />
+                 <asp:BoundColumn DataField="Quantity" HeaderText="Quantity" />
+                 <asp:BoundColumn DataField="Date Ship BY" HeaderText="Date Ship By" />
+                 <asp:BoundColumn DataField="Postage Class" HeaderText="Postage Class" />
+                 <asp:BoundColumn DataField="Postage for Stamps" HeaderText="Postage for Stamps" />
+                 <asp:BoundColumn DataField="AC Rep" HeaderText="AC Rep" />
+
+            </Columns>
+
+
 </asp:datagrid>
+
 
     <div class="left" runat="server">
         </div>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Odbc;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -22,6 +23,8 @@ namespace VVT.ASP.NETv2
 
         protected void Page_Load(object sender, EventArgs e)
         {
+
+            GridView1.AutoGenerateColumns = false;
 
             user = Session["USER"].ToString();
             pass = Session["PASS"].ToString();
@@ -71,20 +74,22 @@ namespace VVT.ASP.NETv2
             dt.Columns[0].ColumnName = "Job ID";
             dt.Columns[1].ColumnName = "Job Status";
             dt.Columns[2].ColumnName = "Job Description";
-            dt.Columns[3].ColumnName = "Quantity";
+            dt.Columns[3].ColumnName = "Quantity Bad";
             dt.Columns[4].ColumnName = "Date Ship By Bad";
             dt.Columns[5].ColumnName = "Postage Class";
             dt.Columns[6].ColumnName = "AC Rep";
 
             //lol no way to format date ship by what a joke
+            //same with quantity is because data type coming from sql query^ is immutable
             dt.Columns.Add("Date Ship By");
+            dt.Columns.Add("Quantity");
 
             //postage cost (calcualted field)
             dt.Columns.Add("Postage for Stamps");
 
-    
 
 
+            int ff = 0;
             foreach (DataRow dr in dt.Rows) {
 
                 #region Job status in easy read forms
@@ -316,21 +321,21 @@ namespace VVT.ASP.NETv2
                 if ( billIt == true && (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort")))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity Bad"].ToString());
 
                     double cost = qty * .25;
 
-                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
+                    dr["Postage for Stamps"] = "$" + String.Format("{0:n}", cost);
                 }
 
                 else if (billIt == true && (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort")))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity Bad"].ToString());
 
                     double cost = qty * .10;
 
-                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
+                    dr["Postage for Stamps"] = "$" + String.Format("{0:n}", cost);
                 }//end else if can put more else if here
                 
                 else { //this will execute if all false^ 
@@ -338,6 +343,10 @@ namespace VVT.ASP.NETv2
                     dr["Postage for Stamps"] = "$0.00";
 
                 }
+                #endregion
+
+                #region formatting quantity
+                dr["Quantity"] = String.Format("{0:n0}", dr["Quantity Bad"]);
                 #endregion
 
 
@@ -348,6 +357,7 @@ namespace VVT.ASP.NETv2
 
             //drop unformatted column and set ordinal so columns back in order lol
             dt.Columns.Remove("Date Ship By Bad");
+            dt.Columns.Remove("Quantity Bad");
 
             dt.Columns["Job ID"].SetOrdinal(0);
             dt.Columns["Job Status"].SetOrdinal(1);
@@ -358,9 +368,18 @@ namespace VVT.ASP.NETv2
             dt.Columns["Postage for Stamps"].SetOrdinal(6);
             dt.Columns["AC Rep"].SetOrdinal(7);
 
-            //this will show data from dataTable (dt)
-            GridView1.DataSource = dt;
 
+            //formatting?
+           // GridView1.Columns[0].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+           // GridView1.Columns[1].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            //GridView1.Columns[2].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            GridView1.Columns[3].ItemStyle.HorizontalAlign = HorizontalAlign.Right;
+            GridView1.Columns[4].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+           // GridView1.Columns[5].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            GridView1.Columns[6].ItemStyle.HorizontalAlign = HorizontalAlign.Right;
+            // GridView1.Columns[7].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+
+            GridView1.DataSource = dt;
             GridView1.DataBind();
             
 
@@ -393,9 +412,11 @@ namespace VVT.ASP.NETv2
         {
             dt.Clear();
             dt.Columns.Clear();
-            GridView1.Columns.Clear();
+            //GridView1.Columns.Clear();
             GridView1.DataSource = dt;
             //GridView1.DataBind();
+
+            GridView1.AutoGenerateColumns = false;
 
             user = Session["USER"].ToString();
             pass = Session["PASS"].ToString();
@@ -424,16 +445,15 @@ namespace VVT.ASP.NETv2
 
             }
 
-
             string queryString = "SELECT Job.\"Job-Id\",  ScheduleByJob.\"TagStatus-ID\", Job.\"Job-Desc\", Job.\"Quantity-Ordered\", Job.\"Date-Ship-By\", MailingVersionFreeField.\"Free-Field-Char\", " +
 
-                       "Job.\"PO-Number\" FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.MailingVersionFreeField ON Job.\"Job-Id\" = MailingVersionFreeField.\"Job-Id\" " +
+                "Job.\"PO-Number\" FROM PUB.JOB INNER JOIN PUB.ScheduleByJob ON Job.\"Job-id\" = ScheduleByJob.\"Job-ID\" INNER JOIN PUB.MailingVersionFreeField ON Job.\"Job-Id\" = MailingVersionFreeField.\"Job-Id\" " +
 
-                       "WHERE \"Cust-ID-Ordered-by\" = \'" + cust + "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
+                "WHERE \"Cust-ID-Ordered-by\" = \'" + cust + "\' AND Job.\"System-ID\" = \'Viso\' AND Job.\"Job-Open\" = 1 AND (ScheduleByJob.\"Tag-Complete\" = 0) AND " +
 
-                       "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
+                "ScheduleByJob.\"Work-Center-ID\" =\'900\' AND MailingVersionFreeField.\"Sequence\"= 5" +
 
-                       "ORDER BY ScheduleByJob.\"TagStatus-ID\"";
+                "ORDER BY ScheduleByJob.\"TagStatus-ID\"";
 
             OdbcDataAdapter custDTadap = new OdbcDataAdapter(queryString, dbConn); //connects to database and passes sql string above to query
 
@@ -446,32 +466,26 @@ namespace VVT.ASP.NETv2
             dt.Columns[0].ColumnName = "Job ID";
             dt.Columns[1].ColumnName = "Job Status";
             dt.Columns[2].ColumnName = "Job Description";
-            dt.Columns[3].ColumnName = "Quantity";
+            dt.Columns[3].ColumnName = "Quantity Bad";
             dt.Columns[4].ColumnName = "Date Ship By Bad";
             dt.Columns[5].ColumnName = "Postage Class";
             dt.Columns[6].ColumnName = "AC Rep";
 
-
             //lol no way to format date ship by what a joke
+            //same with quantity is because data type coming from sql query^ is immutable
             dt.Columns.Add("Date Ship By");
+            dt.Columns.Add("Quantity");
 
             //postage cost (calcualted field)
             dt.Columns.Add("Postage for Stamps");
 
-            //here is where 
-            /*
-             Job statues-show description
-                02-08 - Waiting for All Files
-                09-69 - In Progress
-                70-88 - Mailing Production
-                90 - Complete
-                92 Mailed
-             */
 
 
+            int ff = 0;
             foreach (DataRow dr in dt.Rows)
             {
 
+                #region Job status in easy read forms
                 try
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) >= 02 && Convert.ToInt32(dr["Job Status"].ToString()) <= 08)
@@ -616,8 +630,9 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                #endregion
 
-
+                #region Date Ship By Formatting (MM/dd/yyy)
                 //06.20 format date no time stamp just date (mm/dd/yyy)
                 try
                 {
@@ -641,8 +656,9 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                #endregion
 
-
+                #region Job Description Format to 20 chars
                 //06.20.2024 - shorten description field to 20 charectors
                 try
                 {
@@ -660,6 +676,33 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                #endregion
+
+                #region Mark to bill stamp records if sequence = 1 equals PC Stamp will need loop
+
+                dbConn.Open();
+                DataTable dtStampBillCheck = new DataTable();
+
+                string queryToMarkStampBill = "Select MailingVersionFreeField.\"Free-Field-Char\" FROM PUB.MailingVersionFreeField WHERE \"Job-Id\" = " + dr["Job ID"].ToString() + " AND \"Sequence\"=1";
+                OdbcDataAdapter querySeq1 = new OdbcDataAdapter(queryToMarkStampBill, dbConn); //connects to database and passes sql string above to query
+
+                querySeq1.Fill(dtStampBillCheck);
+
+                dbConn.Close();
+
+                string pcStampStr = dtStampBillCheck.Rows[0][0].ToString();
+                bool billIt = false;
+
+                //now mark seq5 (append Y/N) in column "Postage Class" { if dtStampBillCheck \"Free-Field-Char\" = PC Stamp }
+                if (pcStampStr == "PC Stamp" || pcStampStr.ToUpper() == "PC Stamp" || pcStampStr.ToLower() == "PC Stamp" || pcStampStr.Contains("PC Stamp"))
+                {
+
+                    billIt = true;
+
+                }
+
+
+                #endregion
 
                 #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
@@ -671,26 +714,39 @@ namespace VVT.ASP.NETv2
 
                 string aaa = dr["Postage Class"].ToString();
 
-                if (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort"))
+                if (billIt == true && (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort")))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity Bad"].ToString());
 
                     double cost = qty * .25;
 
-                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
+                    dr["Postage for Stamps"] = "$" + String.Format("{0:n}", cost);
                 }
 
-                if (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort"))
+                else if (billIt == true && (dr["Postage Class"].ToString() == "Standard Presort" || dr["Postage Class"].ToString().ToUpper() == "Standard Presort" || dr["Postage Class"].ToString().ToLower() == "Standard Presort" || dr["Postage Class"].ToString().Contains("Standard Presort")))
                 {
 
-                    int qty = Convert.ToInt32(dr["Quantity"].ToString());
+                    int qty = Convert.ToInt32(dr["Quantity Bad"].ToString());
 
                     double cost = qty * .10;
 
-                    dr["Postage for Stamps"] = "$" + cost.ToString("F");
+                    dr["Postage for Stamps"] = "$" + String.Format("{0:n}", cost);
+                }//end else if can put more else if here
+
+                else
+                { //this will execute if all false^ 
+
+                    dr["Postage for Stamps"] = "$0.00";
+
                 }
                 #endregion
+
+                #region formatting quantity
+                dr["Quantity"] = String.Format("{0:n0}", dr["Quantity Bad"]);
+                #endregion
+
+
 
             }//end foreach
 
@@ -698,6 +754,7 @@ namespace VVT.ASP.NETv2
 
             //drop unformatted column and set ordinal so columns back in order lol
             dt.Columns.Remove("Date Ship By Bad");
+            dt.Columns.Remove("Quantity Bad");
 
             dt.Columns["Job ID"].SetOrdinal(0);
             dt.Columns["Job Status"].SetOrdinal(1);
@@ -709,9 +766,17 @@ namespace VVT.ASP.NETv2
             dt.Columns["AC Rep"].SetOrdinal(7);
 
 
-            //this will show data from dataTable (dt)
-            GridView1.DataSource = dt;
+            //formatting?
+            // GridView1.Columns[0].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            // GridView1.Columns[1].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            //GridView1.Columns[2].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            GridView1.Columns[3].ItemStyle.HorizontalAlign = HorizontalAlign.Right;
+            GridView1.Columns[4].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            // GridView1.Columns[5].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
+            GridView1.Columns[6].ItemStyle.HorizontalAlign = HorizontalAlign.Right;
+            // GridView1.Columns[7].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
 
+            GridView1.DataSource = dt;
             GridView1.DataBind();
 
 
@@ -748,5 +813,9 @@ namespace VVT.ASP.NETv2
 
         }//end export to excelbutton
 
+        protected void GridView1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }//end CustomerJobSearchclass
 }//end namespace
