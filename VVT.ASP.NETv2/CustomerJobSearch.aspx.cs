@@ -30,6 +30,10 @@ namespace VVT.ASP.NETv2
             pass = Session["PASS"].ToString();
             cust = Session["CUST"].ToString();
 
+
+            // comment all out for testing start
+            
+
             //get customer jobs due report specific cust number ^
 
             string connectStr = "DSN=Progress11;uid=Bob;pwd=Orchard";
@@ -93,6 +97,240 @@ namespace VVT.ASP.NETv2
             foreach (DataRow dr in dt.Rows) {
 
                 #region Job status in easy read forms
+
+                //07.01 update
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 02)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() +  " waiting on art and date";
+                    }
+
+                }
+                catch (Exception ex) {
+
+                    // string error = "Error: status 02: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 05)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " print ready – need data";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 05: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 09)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " in prepress";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 09: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (dr["Job Status"].ToString() == "09r" || dr["Job Status"].ToString().ToUpper() == "09R" || dr["Job Status"].ToString().ToLower() == "09r")
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " revision needed";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 09r/09R: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 18)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " out on proof";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 18: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (dr["Job Status"].ToString() == "50" || dr["Job Status"].ToString() == "50d" || dr["Job Status"].ToString().ToUpper() == "50d" || dr["Job Status"].ToString().ToLower() == "50d" || dr["Job Status"].ToString() == "50j" || dr["Job Status"].ToString().ToUpper() == "50j" || dr["Job Status"].ToString().ToLower() == "50j")
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " printing";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 50/50d/50j: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 70)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " bindery";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 70: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 80)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " ready for mailing";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 80: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 88)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " mail complete";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 88: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 90)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " job complete ready to mail";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 90: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 92)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " being delivered";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 92: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 95)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " complete";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 95: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                //07.01 commented out for above
+                /*
+                #region old status values 07.01
                 try
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) >= 02 && Convert.ToInt32(dr["Job Status"].ToString()) <= 08)
@@ -235,12 +473,14 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                */
                 #endregion
+
 
                 #region Date Ship By Formatting (MM/dd/yyy)
                 //06.20 format date no time stamp just date (mm/dd/yyy)
                 try
-                {
+                    {
 
                     DateTime dateTime = new DateTime();
 
@@ -265,10 +505,27 @@ namespace VVT.ASP.NETv2
 
                 #region Job Description Format to 20 chars
                 //06.20.2024 - shorten description field to 20 charectors
+                //07.01.2024 - get all chars before comma ","
                 try
                 {
 
-                    dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
+                    //06.20.2024
+                    //dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
+
+                    try
+                    {
+                        dr["Job Description"] = dr["Job Description"].ToString().Substring(0, dr["Job Description"].ToString().IndexOf(','));
+                    }
+                    catch (Exception ex)
+                    {
+
+                        // string error = "Error: parse for job description: " + ex.ToString();
+
+                        //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                        // File.WriteAllText(path, error);
+
+                    }
 
                 }
                 catch (Exception ex)
@@ -310,11 +567,11 @@ namespace VVT.ASP.NETv2
 
                 #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
-                /*
-                 * Postage Class = First Class Presort then quantity ordered x .25 = postage amount
-                 * Postage class = Standard Presort then qty ordered x .10 = postage amount
-                 * 
-                 */
+                
+                 // Postage Class = First Class Presort then quantity ordered x .25 = postage amount
+                  //Postage class = Standard Presort then qty ordered x .10 = postage amount
+                  
+                 
 
                 string aaa = dr["Postage Class"].ToString();
 
@@ -381,8 +638,24 @@ namespace VVT.ASP.NETv2
 
             GridView1.DataSource = dt;
             GridView1.DataBind();
-            
 
+            
+            //use this for testing comment - not actual data just 1 dummy row
+            /*
+            dt.Columns.Add("Job ID");
+            dt.Columns.Add("Job Status");
+            dt.Columns.Add("Job Description");
+            dt.Columns.Add("Quantity");
+            dt.Columns.Add("Date Ship By");
+            dt.Columns.Add("Postage Class");
+            dt.Columns.Add("Postage for Stamps");
+            dt.Columns.Add("AC Rep");
+
+            dt.Rows.Add("jobID","status","description","qty","ship by","posatge class","postage for stamps","ac rep name");
+            */
+
+            GridView1.DataSource = dt;
+            GridView1.DataBind();
 
         }//end page load
 
@@ -408,7 +681,7 @@ namespace VVT.ASP.NETv2
 
         }
 
-        protected void Refresh_Click(object sender, EventArgs e)
+        public void Refresh_Click(object sender, EventArgs e)
         {
             dt.Clear();
             dt.Columns.Clear();
@@ -421,6 +694,9 @@ namespace VVT.ASP.NETv2
             user = Session["USER"].ToString();
             pass = Session["PASS"].ToString();
             cust = Session["CUST"].ToString();
+
+            // comment all out for testing start
+
 
             //get customer jobs due report specific cust number ^
 
@@ -486,6 +762,241 @@ namespace VVT.ASP.NETv2
             {
 
                 #region Job status in easy read forms
+
+                //07.01 update
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 02)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " waiting on art and date";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 02: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 05)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " print ready – need data";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 05: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 09)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " in prepress";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 09: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (dr["Job Status"].ToString() == "09r" || dr["Job Status"].ToString().ToUpper() == "09R" || dr["Job Status"].ToString().ToLower() == "09r")
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " revision needed";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 09r/09R: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 18)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " out on proof";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 18: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (dr["Job Status"].ToString() == "50" || dr["Job Status"].ToString() == "50d" || dr["Job Status"].ToString().ToUpper() == "50d" || dr["Job Status"].ToString().ToLower() == "50d" || dr["Job Status"].ToString() == "50j" || dr["Job Status"].ToString().ToUpper() == "50j" || dr["Job Status"].ToString().ToLower() == "50j")
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " printing";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 50/50d/50j: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 70)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " bindery";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 70: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 80)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " ready for mailing";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 80: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 88)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " mail complete";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 88: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 90)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " job complete ready to mail";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 90: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 92)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " being delivered";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 92: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                try
+                {
+                    if (Convert.ToInt32(dr["Job Status"].ToString()) == 95)
+                    {
+                        dr["Job Status"] = dr["Job Status"].ToString() + " complete";
+                    }
+
+                }
+                catch (Exception ex)
+                {
+
+                    // string error = "Error: status 95: " + ex.ToString();
+
+                    //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                    // File.WriteAllText(path, error);
+
+                }
+
+                //07.01 commented out for above
+                /*
+                #region old status values 07.01
                 try
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) >= 02 && Convert.ToInt32(dr["Job Status"].ToString()) <= 08)
@@ -493,8 +1004,7 @@ namespace VVT.ASP.NETv2
                         dr["Job Status"] = dr["Job Status"].ToString() + " - Waiting for All Files";
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
 
                     // string error = "Error: status 02-08: " + ex.ToString();
 
@@ -602,8 +1112,7 @@ namespace VVT.ASP.NETv2
                         dr["Job Status"] = dr["Job Status"].ToString() + " - In Progress";
                     }
                 }
-                catch (Exception ex)
-                {
+                catch (Exception ex) {
 
                     // string error = "Error: status 50(Letter): " + ex.ToString();
 
@@ -630,7 +1139,9 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
+                */
                 #endregion
+
 
                 #region Date Ship By Formatting (MM/dd/yyy)
                 //06.20 format date no time stamp just date (mm/dd/yyy)
@@ -660,10 +1171,27 @@ namespace VVT.ASP.NETv2
 
                 #region Job Description Format to 20 chars
                 //06.20.2024 - shorten description field to 20 charectors
+                //07.01.2024 - get all chars before comma ","
                 try
                 {
 
-                    dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
+                    //06.20.2024
+                    //dr["Job Description"] = dr["Job Description"].ToString().Substring(0, 20);
+
+                    try
+                    {
+                        dr["Job Description"] = dr["Job Description"].ToString().Substring(0, dr["Job Description"].ToString().IndexOf(','));
+                    }
+                    catch (Exception ex)
+                    {
+
+                        // string error = "Error: parse for job description: " + ex.ToString();
+
+                        //  string path = @"\\visonas\public\kyle\CustomerSite\log/customer_site_log.txt";
+
+                        // File.WriteAllText(path, error);
+
+                    }
 
                 }
                 catch (Exception ex)
@@ -706,11 +1234,11 @@ namespace VVT.ASP.NETv2
 
                 #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
-                /*
-                 * Postage Class = First Class Presort then quantity ordered x .25 = postage amount
-                 * Postage class = Standard Presort then qty ordered x .10 = postage amount
-                 * 
-                 */
+
+                // Postage Class = First Class Presort then quantity ordered x .25 = postage amount
+                //Postage class = Standard Presort then qty ordered x .10 = postage amount
+
+
 
                 string aaa = dr["Postage Class"].ToString();
 
@@ -780,11 +1308,28 @@ namespace VVT.ASP.NETv2
             GridView1.DataBind();
 
 
+            //use this for testing comment - not actual data just 1 dummy row
+            /*
+            dt.Columns.Add("Job ID");
+            dt.Columns.Add("Job Status");
+            dt.Columns.Add("Job Description");
+            dt.Columns.Add("Quantity");
+            dt.Columns.Add("Date Ship By");
+            dt.Columns.Add("Postage Class");
+            dt.Columns.Add("Postage for Stamps");
+            dt.Columns.Add("AC Rep");
+
+            dt.Rows.Add("jobID","status","description","qty","ship by","posatge class","postage for stamps","ac rep name");
+            */
+
+            GridView1.DataSource = dt;
+            GridView1.DataBind();
+
             Label3.Text = "...Done! Last refresh: "+DateTime.Now;
-            Label1.Visible = true;
+
         }//end refresh button
 
-        protected void Export_Click(object sender, EventArgs e)
+        public void Export_Click(object sender, EventArgs e)
         {
 
         Response.Clear();
@@ -803,13 +1348,7 @@ namespace VVT.ASP.NETv2
         GridView1.RenderControl(htmltextwrtter);
         Response.Write(strwritter.ToString());
 
-            Label2.Text = "...Done!" + DateTime.Now + "\nSee downloads folder...";
-            Label2.Visible = true;
-
-            Response.End();
-
-            Label2.Text = "...Done!"+ DateTime.Now+"\nSee downloads folder...";
-            Label2.Visible = true;
+        Response.End();
 
         }//end export to excelbutton
 

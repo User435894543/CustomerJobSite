@@ -25,7 +25,6 @@
 </script>
 
 
-
     <style>
 .container { 
   height: 200px;
@@ -109,8 +108,6 @@ BorderColor="Black" BackColor="#007A5D"></HeaderStyle>
     <br>
      <div class="center" runat="server">
                 <asp:Button ID="Export" runat="server" Text="Export To Excel" OnClick="Export_Click" OnClientClick="ExporthLbl_Click"  Font-Size="Medium"/>
-         <asp:Label ID="Label4" runat="server" Font-Size="Medium"></asp:Label>
-         <asp:Label ID="Label5" runat="server" Font-Size="Medium"></asp:Label>
          </div>
        
     
@@ -127,5 +124,4 @@ BorderColor="Black" BackColor="#007A5D"></HeaderStyle>
         <asp:Label ID="Label3" runat="server" Font-Size="Medium"></asp:Label>
         </div>
     </br>
-
 </asp:Content>
