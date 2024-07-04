@@ -6,7 +6,7 @@
     <div class="jumbotron">
         <h1>&nbsp;</h1>
         <p class="lead" style="font-size: 50px; color: #229F7A;">VISOgraphic Inc.</p>
-        <p class="lead" style="font-size: 35px; color: #229F7A;">Customer Job Search</p>
+        <p class="lead" style="font-size: 35px; color: #229F7A;">Customer Job Portal</p>
     </div>
 
             <div>
