@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Home Page" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="VVT.ASP.NETv2._Default" %>
+﻿<%@ Page Title="Home Page" MasterPageFile="/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="VVT.ASP.NETv2._Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 

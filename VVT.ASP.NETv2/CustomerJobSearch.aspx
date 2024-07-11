@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Customer Jobs" MasterPageFile="~/Site.Master" Language="C#" AutoEventWireup="true" CodeBehind="CustomerJobSearch.aspx.cs" Inherits="VVT.ASP.NETv2.CustomerJobSearch" %>
+﻿<%@ Page Title="Customer Jobs" MasterPageFile="/Site.Master" Language="C#" AutoEventWireup="true" CodeBehind="CustomerJobSearch.aspx.cs" Inherits="VVT.ASP.NETv2.CustomerJobSearch" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
 
@@ -72,7 +72,7 @@
 
 <div style="display: flex; align-items: flex-start; border-style: none; background-color:white; border-color:white; border-width: 0px">
 
-            <asp:Label ID="legend" runat="server"  CssClass="label-style" Font-Size="Medium" Text ="Status Legend:<br/>02 - waiting on art<br/>05 - print ready - need data<br/>09 - in prepress<br/>09r - revision needed<br/>18 - out on proof<br/>50/50d/50e - printing<br/>70 - bindery<br/>80 - ready for mailing<br/>88 - mail complete<br/>90 - job complete ready to mail<br/>92 - being delivered<br/>95 - complete"></asp:Label>
+            <asp:Label ID="legend" runat="server"  CssClass="label-style" Font-Size="Medium" Text ="Status Legend:<br/>02 - waiting on art and/or data<br/>05 - print ready - need data<br/>09 - in prepress<br/>09r - revision needed<br/>18 - out on proof<br/>50/50d/50e - printing<br/>70 - bindery<br/>80 - ready for mailing<br/>88 - mail complete<br/>90 - job complete ready to mail<br/>92 - being delivered<br/>95 - complete"></asp:Label>
        
 
         <asp:datagrid id="GridView1" runat="server" CssClass="gridview-style" GridLines="Vertical" CellPadding="3"

@@ -41,7 +41,7 @@ namespace VVT.ASP.NETv2
 
             //open th econnection and error check
             OdbcConnection dbConn = new OdbcConnection(connectStr);
-            dbConn.ConnectionTimeout = 5000;
+            dbConn.ConnectionTimeout = 0; //0 is infinity
             try
             {
                 dbConn.Open();
@@ -103,7 +103,7 @@ namespace VVT.ASP.NETv2
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) == 02)
                     {
-                        dr["Job Status"] = dr["Job Status"].ToString() + " waiting on art and date";
+                        dr["Job Status"] = dr["Job Status"].ToString() + " waiting on art and/or data";
                     }
 
                 }
@@ -706,7 +706,7 @@ namespace VVT.ASP.NETv2
 
             //open th econnection and error check
             OdbcConnection dbConn = new OdbcConnection(connectStr);
-            dbConn.ConnectionTimeout = 5000;
+            dbConn.ConnectionTimeout = 0; //0 is infinity
             try
             {
                 dbConn.Open();
@@ -769,7 +769,7 @@ namespace VVT.ASP.NETv2
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) == 02)
                     {
-                        dr["Job Status"] = dr["Job Status"].ToString() + " waiting on art and date";
+                        dr["Job Status"] = dr["Job Status"].ToString() + " waiting on art and/or data";
                     }
 
                 }
