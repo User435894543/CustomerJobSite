@@ -563,7 +563,7 @@ namespace VVT.ASP.NETv2
                 }
 
 
-                #endregion
+                #endregion - connection reopened
 
                 #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
@@ -699,6 +699,12 @@ namespace VVT.ASP.NETv2
             //if refresh click and no checkboxes
             //if (CheckBox1.Checked == false && CheckBox2.Checked == false)
             // {
+            // comment all out for testing start
+
+
+            Server.TransferRequest(Request.Url.AbsolutePath, false);
+
+            /*
             //get customer jobs due report specific cust number ^
 
             string connectStr = "DSN=Progress11;uid=Bob;pwd=Orchard";
@@ -994,10 +1000,10 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
-
+                #endregion
                 //07.01 commented out for above
-                /*
                 #region old status values 07.01
+                /*
                 try
                 {
                     if (Convert.ToInt32(dr["Job Status"].ToString()) >= 02 && Convert.ToInt32(dr["Job Status"].ToString()) <= 08)
@@ -1140,7 +1146,7 @@ namespace VVT.ASP.NETv2
                     // File.WriteAllText(path, error);
 
                 }
-                */
+                
                 #endregion
 
 
@@ -1231,13 +1237,17 @@ namespace VVT.ASP.NETv2
                 }
 
 
-                #endregion
+                #endregion - connection reopened
 
                 #region Get postage for Stamps (Stamp jobs only)
                 //calculate postage amount
 
                 // Postage Class = First Class Presort then quantity ordered x .25 = postage amount
                 //Postage class = Standard Presort then qty ordered x .10 = postage amount
+
+
+
+                string aaa = dr["Postage Class"].ToString();
 
                 if (billIt == true && (dr["Postage Class"].ToString() == "First Class Presort" || dr["Postage Class"].ToString().ToUpper() == "First Class Presort" || dr["Postage Class"].ToString().ToLower() == "First Class Presort" || dr["Postage Class"].ToString().Contains("First Class Presort")))
                 {
@@ -1302,6 +1312,8 @@ namespace VVT.ASP.NETv2
             // GridView1.Columns[7].ItemStyle.HorizontalAlign = HorizontalAlign.Center;
 
 
+
+
             //use this for testing comment - not actual data just 1 dummy row
             /*
             dt.Columns.Add("Job ID");
@@ -1313,12 +1325,12 @@ namespace VVT.ASP.NETv2
             dt.Columns.Add("Postage for Stamps");
             dt.Columns.Add("AC Rep");
 
-            dt.Rows.Add("jobID","status","description","qty","ship by","posatge class","postage for stamps","ac rep name");
-            */
+            dt.Rows.Add("252374","02 waiting on art and date","	A1235 STOKES-TRAINOR CBGC / 6x9 letter/coupon/ GREY 3.75 x 6.75","4,266","07-08-2024","First Class Presort","$1,066.50","Patrick Fust");
+            
 
             GridView1.DataSource = dt;
             GridView1.DataBind();
-
+            */
             Label3.Text = "...Done! Last refresh: " + DateTime.Now;
 
             #endregion
