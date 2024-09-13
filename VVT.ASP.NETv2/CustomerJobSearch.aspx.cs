@@ -20,6 +20,7 @@ namespace VVT.ASP.NETv2
 
         DataTable dt = new DataTable();
 
+        int rowCount = 0;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -655,6 +656,11 @@ namespace VVT.ASP.NETv2
 
             GridView1.DataSource = dt;
             GridView1.DataBind();
+
+            rowCount = dt.Rows.Count;
+            //int count = dt.Rows.Count;
+            Label5.Text = rowCount.ToString();
+
 
         }//end page load
 
@@ -3247,7 +3253,9 @@ namespace VVT.ASP.NETv2
             //dt.Merge(dt2);
 
 
-
+            rowCount = dt.Rows.Count;
+            //int count = dt.Rows.Count;
+            Label5.Text = rowCount.ToString();
 
 
         }//end refresh button
@@ -3273,7 +3281,6 @@ namespace VVT.ASP.NETv2
         Response.Write(strwritter.ToString());
 
         Response.End();
-
         }//end export to excelbutton
 
         protected void GridView1_SelectedIndexChanged(object sender, EventArgs e)

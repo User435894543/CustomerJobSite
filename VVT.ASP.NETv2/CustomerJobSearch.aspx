@@ -113,9 +113,15 @@ BorderColor="Black" BackColor="#007A5D"></HeaderStyle>
 
     <br>
      <div class="center" runat="server">
-                <asp:Button ID="Export" runat="server" Text="Export To Excel" OnClick="Export_Click" OnClientClick="ExporthLbl_Click"  Font-Size="Medium"/>
+                <asp:Button ID="Export" runat="server" Text="Export To Excel" OnClick="Export_Click" OnClientClick="doProcess();Export_Click();return true;"  Font-Size="Medium"/>
          <asp:Label ID="Label4" runat="server" Font-Size="Medium"></asp:Label>
-         <asp:Label ID="Label5" runat="server" Font-Size="Medium"></asp:Label>
+         <asp:Label Text="" ID="lbl" runat="server" />
+
+
+         <br />
+
+
+
          </div>
        
     
@@ -133,7 +139,28 @@ BorderColor="Black" BackColor="#007A5D"></HeaderStyle>
         </div>
     </br>
 
+    <asp:Label ID="Label6" Text="Total Records: " runat="server" Font-Size="Medium"></asp:Label>
+         <asp:Label ID="Label5" runat="server" Font-Size="Medium"></asp:Label>
+
+    <br />
+
     <asp:CheckBox ID="CheckBox1" runat="server" Text ="See Closed Jobs Only&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" Visible="False"/>
     <asp:CheckBox ID="CheckBox2" runat="server" Text ="See Closed Jobs at the end of Open Jobs" Visible="False"/>
+
+
+
+       <script>
+           function doProcess() {
+               var i = 0;
+               var rowCounter = parseInt(document.getElementById('<%=Label5.ClientID%>').innerText)
+               var interval = window.setInterval(function () {
+                   document.getElementById('<%=lbl.ClientID%>').textContent = "Processing Records: " + i;
+                i++;
+                   if (i > rowCounter)
+                    clearInterval(interval);
+               }, 975);
+           }
+
+       </script>
 
 </asp:Content>
