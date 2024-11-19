@@ -158,7 +158,7 @@ BorderColor="Black" BackColor="#007A5D"></HeaderStyle>
                 i++;
                    if (i > rowCounter)
                     clearInterval(interval);
-               }, 975);
+               }, 3);
            }
 
        </script>
