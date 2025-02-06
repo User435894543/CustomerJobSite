@@ -11,7 +11,7 @@ namespace VVT.ASP.NETv2
 {
 
 
-    public partial class ShippingCostReport
+    public partial class CostReport
     {
 
         /// <summary>
@@ -31,6 +31,24 @@ namespace VVT.ASP.NETv2
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox TextBox1;
+
+        /// <summary>
+        /// Label3 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label Label3;
+
+        /// <summary>
+        /// TextBox3 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox TextBox3;
 
         /// <summary>
         /// Label2 control.
@@ -60,6 +78,15 @@ namespace VVT.ASP.NETv2
         protected global::System.Web.UI.WebControls.Button Button1;
 
         /// <summary>
+        /// Button3 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button Button3;
+
+        /// <summary>
         /// Button2 control.
         /// </summary>
         /// <remarks>
@@ -69,12 +96,12 @@ namespace VVT.ASP.NETv2
         protected global::System.Web.UI.WebControls.Button Button2;
 
         /// <summary>
-        /// CrystalReportViewer1 control.
+        /// GridView1 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::CrystalDecisions.Web.CrystalReportViewer CrystalReportViewer1;
+        protected global::System.Web.UI.WebControls.GridView GridView1;
     }
 }
