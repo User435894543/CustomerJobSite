@@ -27,254 +27,126 @@ namespace VVT.ASP.NETv2
             DateTime startDate = DateTime.Parse(TextBox3.Text);
             string connectStr = "DSN=Progress11;uid=Bob;pwd=Orchard";
 
-            // open the connection and error check
             OdbcConnection dbConn = new OdbcConnection(connectStr);
-            dbConn.ConnectionTimeout = 0; //0 is infinity
+            dbConn.ConnectionTimeout = 0;
             try
             {
                 dbConn.Open();
             }
             catch (Exception ex)
             {
-
                 string error = ex + " : DB error cannot connect";
-
                 dbConn.Close();
-
-
-
             }
 
-
-            string queryFF = "SELECT DISTINCT Job.\"Date-Entered\", Job.\"Contact-Name\", Job.\"External-Order-Number\", Job.\"Quantity-Ordered\", Job.\"Job-Desc\", Job.\"Quotation-Amount\", " +
+            string queryFF = "SELECT DISTINCT Job.\"Date-Entered\", JobShipTo.\"Actual-Ship-Date\", Job.\"Contact-Name\", Job.\"Job-ID\", Job.\"External-Order-Number\", Job.\"Quantity-Ordered\", Job.\"Job-Desc\", Job.\"Quotation-Amount\", " +
                 "JobShipTo.\"Billable-Freight\", JobShipTo.\"Waybill-Number\" " +
                 "FROM PUB.cust AS cust " +
+                "INNER JOIN PUB.Job AS Job " +
+                "ON cust.\"Cust-code\" = Job.\"Cust-ID-Ordered-by\" " +
+                "LEFT JOIN PUB.JobShipTo AS JobShipTo " +
+                "ON Job.\"Job-ID\" = JobShipTo.\"Job-ID\" " +
+                "INNER JOIN PUB.ScheduleByJob AS ScheduleByJob " +
+                "ON Job.\"Job-ID\" = ScheduleByJob.\"Job-ID\" " +
+                "WHERE cust.\"Cust-code\" = " + TextBox1.Text + " AND " +
+                "Job.\"Date-Entered\" >= '" + startDate + "' AND " +
+                "Job.\"Date-Entered\" <= '" + endDate + "' AND " +
+                "ScheduleByJob.\"TagStatus-ID\" = 97 AND " +
+                "Job.\"Job-Open\" = 1 AND " +
+                "ScheduleByJob.\"Tag-Complete\" = 0 AND " +
+                "ScheduleByJob.\"TagStatus-ID\" = 97 AND " +
+                "ScheduleByJob.\"System-ID\" = 'Viso' AND " +
+                "cust.\"System-ID\" = 'Viso' ";
 
-               "INNER JOIN PUB.Job AS Job " +
-               "ON cust.\"Cust-code\" = Job.\"Cust-ID-Ordered-by\" " +
-
-               "LEFT JOIN PUB.JobShipTo AS JobShipTo " +
-
-              "ON Job.\"Job-ID\" = JobShipTo.\"Job-ID\" " +
-              "INNER JOIN PUB.ScheduleByJob AS ScheduleByJob " +
-              "ON Job.\"Job-ID\" = ScheduleByJob.\"Job-ID\" " +
-              "WHERE cust.\"Cust-code\" = " + TextBox1.Text + " AND " +
-              "Job.\"Date-Entered\" >= \'" + startDate + "\' AND " +
-              "Job.\"Date-Entered\" <= \'" + endDate + "\' AND " +
-              "ScheduleByJob.\"TagStatus-ID\" = 97 AND " +
-              "Job.\"Job-Open\" = 1 AND " +
-              "ScheduleByJob.\"Tag-Complete\" = 0 AND " +
-              "ScheduleByJob.\"TagStatus-ID\" = 97 AND " +
-              "ScheduleByJob.\"System-ID\" = \'Viso\' AND " +
-              "cust.\"System-ID\" = \'Viso\' ";// +
-                                               //"GROUP BY " +
-                                               //"Job.\"Date-Entered\", Job.\"Contact-Name\", Job.\"External-Order-Number\", Job.\"Job-ID\", Job.\"Quantity-Ordered\", Job.\"Job-Desc\", Job.\"Quotation-Amount\", JobShipTo.\"Waybill-Number\"";
-
-            OdbcDataAdapter custDTadap = new OdbcDataAdapter(queryFF, dbConn); //connects to database and passes sql string above to query
-
+            OdbcDataAdapter custDTadap = new OdbcDataAdapter(queryFF, dbConn);
             custDTadap.Fill(dt);
-
             dbConn.Close();
 
             DataTable finaldt = new DataTable();
-
-            // Define the schema for finaldt (columns).
             finaldt.Columns.Add("Count", typeof(int));
-            finaldt.Columns.Add("Date", typeof(string)); // Use string if dates are formatted
+            finaldt.Columns.Add("Date", typeof(string));
+            finaldt.Columns.Add("Ship Date", typeof(string));
             finaldt.Columns.Add("Name", typeof(string));
             finaldt.Columns.Add("Status", typeof(string));
+            finaldt.Columns.Add("Viso Job ID", typeof(string));
             finaldt.Columns.Add("Order ID", typeof(string));
             finaldt.Columns.Add("Quantity", typeof(int));
             finaldt.Columns.Add("Item SKU #", typeof(string));
-            finaldt.Columns.Add("Pick/Pack Fee", typeof(string)); // Assuming it's monetary
-            finaldt.Columns.Add("Shipment Cost", typeof(string)); // Assuming it's monetary
+            finaldt.Columns.Add("Pick/Pack Fee", typeof(string));
+            finaldt.Columns.Add("Shipment Cost", typeof(string));
             finaldt.Columns.Add("Tracking #", typeof(string));
+            finaldt.Columns.Add("Shipping Totals", typeof(string));
 
-            // Initialize variables for running totals.
-            decimal totalPickPackFee = 0;
-            decimal totalShipmentCost = 0;
-
-            // Add row numbers sequentially and copy data from dt to finaldt.
+            Dictionary<string, List<decimal>> orderShippingCosts = new Dictionary<string, List<decimal>>();
+            Dictionary<string, DataRow> lastRowForOrder = new Dictionary<string, DataRow>();
             int rowCount = 1;
+
             foreach (DataRow row in dt.Rows)
             {
-                DataRow newRow = finaldt.NewRow();
-                newRow["Count"] = rowCount;
-                newRow["Date"] = Convert.ToDateTime(row["Date-Entered"]).ToString("MM/dd/yyyy");
-                newRow["Name"] = row["Contact-Name"];
-                newRow["Status"] = "Shipped";
-                newRow["Order ID"] = row["External-Order-Number"];
-                newRow["Quantity"] = row["Quantity-Ordered"];
-                newRow["Item SKU #"] = row["Job-Desc"];
+                try
+                {
+                    DataRow newRow = finaldt.NewRow();
+                    newRow["Count"] = rowCount;
+                    newRow["Date"] = Convert.ToDateTime(row["Date-Entered"]).ToString("MM/dd/yyyy");
+                    newRow["Ship Date"] = Convert.ToDateTime(row["Actual-Ship-Date"]).ToString("MM/dd/yyyy");
+                    newRow["Name"] = row["Contact-Name"];
+                    newRow["Status"] = "Shipped";
+                    newRow["Viso Job ID"] = row["Job-ID"];
+                    newRow["Order ID"] = row["External-Order-Number"];
+                    newRow["Quantity"] = row["Quantity-Ordered"];
+                    newRow["Item SKU #"] = row["Job-Desc"];
 
-                // Parse and format monetary values.
-                //decimal pickPackFee = Convert.ToDecimal(row["Quotation-Amount"]);
-                decimal shipmentCost = Convert.ToDecimal(row["Billable-Freight"]);
+                    decimal shipmentCost = Convert.ToDecimal(row["Billable-Freight"]);
+                    newRow["Pick/Pack Fee"] = "$" + row["Quotation-Amount"].ToString();
+                    newRow["Shipment Cost"] = "$" + shipmentCost.ToString("F2");
+                    newRow["Tracking #"] = row["Waybill-Number"];
 
-                //totalPickPackFee += pickPackFee;
-                totalShipmentCost += shipmentCost;
+                    string orderId = row["External-Order-Number"].ToString();
+                    if (!orderShippingCosts.ContainsKey(orderId))
+                    {
+                        orderShippingCosts[orderId] = new List<decimal>();
+                    }
+                    orderShippingCosts[orderId].Add(shipmentCost);
 
-                newRow["Pick/Pack Fee"] = "$" + row["Quotation-Amount"].ToString();
-                newRow["Shipment Cost"] = "$" + shipmentCost.ToString("F2");
-                newRow["Tracking #"] = row["Waybill-Number"];
-
-                finaldt.Rows.Add(newRow);
-                rowCount++;
+                    finaldt.Rows.Add(newRow);
+                    lastRowForOrder[orderId] = newRow;
+                    rowCount++;
+                }
+                catch (Exception ex) { }
             }
 
-
-
-            //DataTable dt2 = finaldt.Clone(); // Create a new DataTable with the same structure as finaldt.
-
-            //// Dictionary to store tracking numbers per Order ID
-            //Dictionary<string, string> orderTrackingNumbers = new Dictionary<string, string>();
-            //bool firstRowOfOrder;
-
-            //// Iterate through all rows to gather tracking numbers per Order ID
-            //foreach (DataRow dr in finaldt.Rows)
-            //{
-            //    string orderId = dr["Order ID"].ToString();
-            //    string trackingNumber = dr["Tracking #"].ToString();
-
-            //    // Accumulate tracking numbers for each Order ID
-            //    if (orderTrackingNumbers.ContainsKey(orderId))
-            //    {
-            //        // Append the tracking number only if it's not already in the list
-            //        if (!orderTrackingNumbers[orderId].Contains(trackingNumber))
-            //        {
-            //            orderTrackingNumbers[orderId] += Environment.NewLine + trackingNumber;
-            //        }
-            //    }
-            //    else
-            //    {
-            //        // Store the first tracking number for this order
-            //        orderTrackingNumbers[orderId] = trackingNumber;
-            //    }
-            //}
-
-            //// Now create the new DataTable with tracking numbers only in the first row of each Order ID
-            //DataTable dt3 = finaldt.Clone(); // Clone structure
-
-            //HashSet<string> processedOrders = new HashSet<string>(); // Track first occurrence of Order ID
-
-            //foreach (DataRow dr in finaldt.Rows)
-            //{
-            //    DataRow newRow = dt3.NewRow();
-
-            //    // Copy all columns from the original row
-            //    foreach (DataColumn col in finaldt.Columns)
-            //    {
-            //        newRow[col.ColumnName] = dr[col.ColumnName];
-            //    }
-
-            //    string orderId = dr["Order ID"].ToString();
-
-            //    // Determine if it's the first row for this Order ID
-            //    if (!processedOrders.Contains(orderId))
-            //    {
-            //        // Assign accumulated tracking numbers
-            //        newRow["Tracking #"] = orderTrackingNumbers[orderId];
-            //        processedOrders.Add(orderId); // Mark this Order ID as processed
-            //    }
-            //    else
-            //    {
-            //        // Empty out the tracking number for subsequent rows of the same Order ID
-            //        newRow["Tracking #"] = DBNull.Value;
-            //    }
-
-            //    dt3.Rows.Add(newRow);
-            //}
-
-
-            //// Add the grouped rows to dt2.
-            //foreach (var groupedRow in groupedRows.Values)
-            //{
-            //    dt2.Rows.Add(groupedRow);
-            //}
-
-
-
-            // Add row numbers to dt2 for combined data.
-
-            foreach (DataRow row in finaldt.Rows)
+            foreach (var orderId in lastRowForOrder.Keys)
             {
-
-
-                totalPickPackFee += Convert.ToDecimal(row["Pick/Pack Fee"].ToString().Trim('$'));
-
+                if (orderShippingCosts[orderId].Count > 1)
+                {
+                    lastRowForOrder[orderId]["Shipping Totals"] = "$" + orderShippingCosts[orderId].Sum().ToString("F2");
+                }
             }
 
+            // Calculate Totals
+            int totalQuantity = finaldt.AsEnumerable().Sum(row => row.Field<int>("Quantity"));
+            decimal totalShippingCost = finaldt.AsEnumerable()
+                .Where(row => row["Shipping Totals"] != DBNull.Value && row["Shipping Totals"].ToString() != "")
+                .Sum(row => decimal.Parse(row["Shipping Totals"].ToString().Replace("$", "")));
 
+            decimal totalPickPackFee = finaldt.AsEnumerable()
+                .Where(row => row["Pick/Pack Fee"] != DBNull.Value && row["Pick/Pack Fee"].ToString() != "")
+                .Sum(row => decimal.Parse(row["Pick/Pack Fee"].ToString().Replace("$", "")));
 
+            // Insert Total Row
+            DataRow totalRow = finaldt.NewRow();
+            totalRow["Item SKU #"] = "Totals:";
+            totalRow["Pick/Pack Fee"] = "$" + totalPickPackFee.ToString("F2");
+            totalRow["Shipping Totals"] = "$" + totalShippingCost.ToString("F2");
 
-            //dt2.DefaultView.Sort = "Date ASC";
+            // Add Total Row to DataTable
+            finaldt.Rows.Add(totalRow);
 
-
-            //// Add a totals row to the last row.
-            //DataRow totalsRow = dt2.NewRow();
-            //totalsRow["Count"] = DBNull.Value; // No count for the totals row.
-            //totalsRow["Date"] = DBNull.Value;
-            //totalsRow["Name"] = DBNull.Value;
-            //totalsRow["Status"] = DBNull.Value;
-            //totalsRow["Order ID"] = DBNull.Value;
-            //totalsRow["Quantity"] = DBNull.Value;
-            //totalsRow["Item SKU #"] = "Total";
-            //totalsRow["Pick/Pack Fee"] = "$" + totalPickPackFee.ToString("F2");
-            //totalsRow["Shipment Cost"] = "$" + totalShipmentCost.ToString("F2");
-            //totalsRow["Tracking #"] = DBNull.Value;
-
-            //// Add the totals row to finaldt.
-            //dt2.Rows.Add(totalsRow);
-
-
-
-            //GridView1.DataSource = dt2;
-            //GridView1.DataBind();
-
-            //testing sort by date (date is a string but works)
-            //dt2.Rows[3]["Date"] ="01/07/2025";
-
-            // Create a new DataTable to hold the sorted data
-
-
-
-            DataTable sortedDt = finaldt.Clone(); // Clone the schema of the original DataTable
-
-            // Use LINQ to sort the rows by Date in ascending order
-            var sortedRows = from row in finaldt.AsEnumerable()
-                             orderby DateTime.Parse(row.Field<string>("Date")) descending
-                             select row;
-
-            // Import sorted rows into the new DataTable
-            int rowcount2 = 1;
-            foreach (var row in sortedRows)
-            {
-                row["Count"] = rowcount2;
-                sortedDt.ImportRow(row);
-
-                rowcount2++;
-
-            }
-
-            // After sorting, add the totals row
-            DataRow totalsRow = sortedDt.NewRow();
-            totalsRow["Count"] = DBNull.Value; // No count for the totals row
-            totalsRow["Date"] = DBNull.Value;
-            totalsRow["Name"] = DBNull.Value;
-            totalsRow["Status"] = DBNull.Value;
-            totalsRow["Order ID"] = DBNull.Value;
-            totalsRow["Quantity"] = DBNull.Value;
-            totalsRow["Item SKU #"] = "Total";
-            totalsRow["Pick/Pack Fee"] = "$" + totalPickPackFee.ToString("F2");
-            totalsRow["Shipment Cost"] = "$" + totalShipmentCost.ToString("F2");
-            totalsRow["Tracking #"] = DBNull.Value;
-
-            // Add the totals row to the sorted DataTable
-            sortedDt.Rows.Add(totalsRow);
-
-            // Bind the sorted DataTable to the GridView
-            GridView1.DataSource = sortedDt;
+            // Bind to GridView
+            GridView1.DataSource = finaldt;
             GridView1.DataBind();
+
+
         }
 
         //export to pdf

@@ -36,15 +36,18 @@
     <asp:GridView ID="GridView1" runat="server" CssClass="table table-striped table-bordered" AutoGenerateColumns="False" OnSelectedIndexChanged="GridView1_SelectedIndexChanged">
         <Columns>
             <asp:BoundField DataField="Count" HeaderText="Count" />
-            <asp:BoundField DataField="Date" HeaderText="Date" />
+            <asp:BoundField DataField="Date" HeaderText="Order Date" />
+            <asp:BoundField DataField="Ship Date" HeaderText="Ship Date" />
             <asp:BoundField DataField="Name" HeaderText="Name" ItemStyle-Width="25%"/>
             <asp:BoundField DataField="Status" HeaderText="Status" />
+            <asp:BoundField DataField="Viso Job ID" HeaderText="Viso Job ID" />
             <asp:BoundField DataField="Order ID" HeaderText="Order ID" />
             <asp:BoundField DataField="Quantity" HeaderText="Quantity" />
-            <asp:BoundField DataField="Item SKU #" HeaderText="Item SKU #" ItemStyle-Width="80%"/>
+            <asp:BoundField DataField="Item SKU #" HeaderText="Item SKU #" ItemStyle-Width="120%"/>
             <asp:BoundField DataField="Pick/Pack Fee" HeaderText="Pick/Pack Fee" />
-            <asp:BoundField DataField="Shipment Cost" HeaderText="Shipment Cost" />
-            <asp:BoundField DataField="Tracking #" HeaderText="Tracking #" />
+            <asp:BoundField DataField="Shipping Totals" HeaderText="Shipping Cost" ItemStyle-Width="800%"/>
+            <asp:BoundField DataField="Tracking #" HeaderText="Tracking #" ItemStyle-Width="120%"/>
+          
         </Columns>
     </asp:GridView>
 </asp:Content>
