@@ -117,11 +117,10 @@ namespace VVT.ASP.NETv2
 
             foreach (var orderId in lastRowForOrder.Keys)
             {
-                if (orderShippingCosts[orderId].Count > 1)
-                {
-                    lastRowForOrder[orderId]["Shipping Totals"] = "$" + orderShippingCosts[orderId].Sum().ToString("F2");
-                }
+                lastRowForOrder[orderId]["Shipping Totals"] = "$" + orderShippingCosts[orderId].Sum().ToString("F2");
             }
+
+
 
             // Calculate Totals
             int totalQuantity = finaldt.AsEnumerable().Sum(row => row.Field<int>("Quantity"));
